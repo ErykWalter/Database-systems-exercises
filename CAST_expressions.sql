@@ -1,0 +1,7 @@
+SELECT SURNAME, SALARY,
+	CASE
+		WHEN SALARY < 1500 THEN 'low salary'
+		WHEN SALARY < 3000 THEN 'average salary'
+		ELSE 'well paid'
+	END AS "LABEL"
+FROM EMPLOYEES;
