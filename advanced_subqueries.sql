@@ -1,0 +1,73 @@
+-- 1.
+SELECT * 
+FROM DEPARTMENTS d 
+WHERE NOT EXISTS 
+	(SELECT e.EMP_ID 
+	FROM EMPLOYEES e
+	WHERE e.DEPT_ID = d.DEPT_ID);
+	
+-- 2
+SELECT 
+	e2.SURNAME,
+	e2.JOB,
+	e2.SALARY
+FROM 
+	(SELECT AVG(e.SALARY) AS job_avg, e.JOB AS JOB
+	FROM EMPLOYEES e
+	GROUP BY e.JOB) averages
+	JOIN EMPLOYEES e2 
+	ON averages.JOB = e2.JOB
+WHERE e2.SALARY > averages.job_avg
+ORDER BY e2.SURNAME;
+
+-- 3
+SELECT 
+	e2.SURNAME,
+	e2.JOB,
+	e2.SALARY,
+	averages.job_avg
+FROM 
+	(SELECT AVG(e.SALARY) AS job_avg, e.JOB AS JOB
+	FROM EMPLOYEES e
+	GROUP BY e.JOB) averages
+	JOIN EMPLOYEES e2 
+	ON averages.JOB = e2.JOB
+WHERE e2.SALARY > averages.job_avg
+ORDER BY e2.SURNAME;
+
+-- 4
+SELECT e.SURNAME, e.JOB, e.SALARY
+FROM EMPLOYEES e
+WHERE e.SALARY >= 0.6 * (SELECT b.SALARY FROM EMPLOYEES b WHERE b.EMP_ID = e.BOSS_ID)
+ORDER BY e.SURNAME;
+
+-- 5
+SELECT MAX(SUM(e.salary)) AS total
+FROM EMPLOYEES e
+GROUP BY e.dept_id
+;
+
+-- 6
+SELECT 
+	d.DEPT_NAME, 
+	totals.total 
+FROM 
+	(SELECT SUM(e.salary) AS total, e.dept_id 
+	FROM EMPLOYEES e
+	GROUP BY e.dept_id) totals
+JOIN DEPARTMENTS d ON d.DEPT_ID = totals.dept_id
+WHERE totals.total = (SELECT MAX(SUM(e2.salary)) FROM EMPLOYEES e2 GROUP BY e2.DEPT_ID);
+
+--7
+SELECT t.dept_name, t.surname, t.salary
+FROM 
+	(SELECT d.dept_name, e.SURNAME , e.SALARY 
+	FROM DEPARTMENTS d JOIN EMPLOYEES e ON e.DEPT_ID = d.dept_id
+	WHERE e.SALARY >= (SELECT MAX(e2.salary) FROM EMPLOYEES e2 WHERE e2.DEPT_ID = d.dept_id)) t
+ORDER BY t.dept_name;
+
+--8
+SELECT e.SURNAME, e.SALARY 
+FROM EMPLOYEES e 
+where (SELECT COUNT(*) FROM EMPLOYEES e2 WHERE e2.SALARY > e.SALARY) < 3
+ORDER BY SALARY DESC  
